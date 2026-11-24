@@ -1,0 +1,50 @@
+export const en = {
+  app: {
+    eyebrow: "Roastery back office",
+    title: "Coffee Catalog",
+    market: "Market",
+    pricesOn: "Prices on",
+    language: "Language",
+  },
+  table: {
+    sku: "SKU",
+    roast: "Roast",
+    origin: "Origin",
+    price: "Price",
+    empty: "Nothing on sale in {{market}} on this date.",
+  },
+  roast: {
+    light: "Light",
+    medium: "Medium",
+    dark: "Dark",
+  },
+  detail: {
+    label: "Details for {{code}}",
+    close: "Close details",
+    priceHistory: "Price history",
+    now: "now",
+    newPrice: "New price in {{market}}",
+    from: "From",
+    price: "Price ({{currency}})",
+    setPrice: "Set price",
+    discontinue: "Discontinue",
+    discontinueOn: "From",
+    discontinueAction: "Discontinue",
+    events: "Events",
+  },
+  event: {
+    launch: "Launch",
+    price_change: "Price change",
+    discontinue: "Discontinued",
+    launchedAt: "Launched at {{amount}}",
+    newPrice: "New price {{amount}}",
+    discontinued: "No longer sold",
+  },
+  message: {
+    enterPrice: "Enter a price in {{currency}}",
+    priceSet: "New {{market}} price from {{date}}",
+    discontinuedFrom: "Discontinued from {{date}}",
+  },
+};
+
+export type Messages = typeof en;
