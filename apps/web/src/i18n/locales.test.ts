@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { en } from "./locales/en.ts";
+import { es } from "./locales/es.ts";
 import { ja } from "./locales/ja.ts";
 import { pl } from "./locales/pl.ts";
 
@@ -22,6 +23,7 @@ function placeholders(text: string): string[] {
 const source = flatten(en);
 
 describe.each([
+  ["es", es],
   ["ja", ja],
   ["pl", pl],
 ])("%s locale", (_, locale) => {

@@ -2,11 +2,13 @@ import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 import { en, type Messages } from "./locales/en.ts";
+import { es } from "./locales/es.ts";
 import { ja } from "./locales/ja.ts";
 import { pl } from "./locales/pl.ts";
 
 export const LANGUAGES = [
   { code: "en", label: "English" },
+  { code: "es", label: "Español" },
   { code: "ja", label: "日本語" },
   { code: "pl", label: "Polski" },
 ] as const;
@@ -15,6 +17,7 @@ export type Language = (typeof LANGUAGES)[number]["code"];
 
 export const resources = {
   en: { translation: en },
+  es: { translation: es },
   ja: { translation: ja },
   pl: { translation: pl },
 } satisfies Record<Language, { translation: Messages }>;

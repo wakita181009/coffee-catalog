@@ -16,7 +16,7 @@ Each line has a test in [`apps/api/test/done-when.test.ts`](apps/api/test/done-w
 ```
 apps/
   api/   Hono API on Node's built-in SQLite (node:sqlite)
-  web/   React + Vite UI, built with shadcn/ui and Tailwind CSS v4, in English, Japanese and Polish
+  web/   React + Vite UI, built with shadcn/ui and Tailwind CSS v4, in English, Spanish, Japanese and Polish
 ```
 
 The web app calls the API through Hono's typed client (`hono/client`), so request and response types come straight from `apps/api/src/app.ts`.
@@ -85,9 +85,9 @@ All errors return `{ "error": "invalid" | "not_found" | "conflict" | "internal",
 
 ## Translations
 
-The UI is in English, Japanese and Polish ([react-i18next](https://react.i18next.com/)). The language is picked from `localStorage`, then the browser, and falls back to English. People can switch it in the header.
+The UI is in English, Spanish, Japanese and Polish ([react-i18next](https://react.i18next.com/)). The language is picked from `localStorage`, then the browser, and falls back to English. People can switch it in the header.
 
-- Messages live in `apps/web/src/i18n/locales/{en,ja,pl}.ts`. English is the source; the other files are typed against it, so a missing key fails `pnpm typecheck`.
+- Messages live in `apps/web/src/i18n/locales/{en,es,ja,pl}.ts`. English is the source; the other files are typed against it, so a missing key fails `pnpm typecheck`.
 - `apps/web/src/i18n/locales.test.ts` also checks that every locale has the same `{{placeholders}}` as English.
 - Dates and market names follow the UI language (`Intl.DateTimeFormat`, `Intl.DisplayNames`). Prices keep the market's own currency format, since that is what customers there see.
 - Product data (SKU names, origins) and API error messages are not translated.

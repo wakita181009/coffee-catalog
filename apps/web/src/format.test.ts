@@ -9,6 +9,7 @@ describe("formatDate", () => {
   test("follows the UI language", () => {
     expect(formatDate("2026-10-01", "ja")).toBe("2026/10/01");
     expect(formatDate("2026-10-01", "pl")).toBe("1 paź 2026");
+    expect(formatDate("2026-10-01", "es")).toBe("1 oct 2026");
   });
 });
 
@@ -17,6 +18,7 @@ describe("marketName", () => {
     expect(marketName("JP", "en", "Japan")).toBe("Japan");
     expect(marketName("JP", "ja", "Japan")).toBe("日本");
     expect(marketName("ES", "pl", "Spain")).toBe("Hiszpania");
+    expect(marketName("JP", "es", "Japan")).toBe("Japón");
   });
 
   test("falls back to the stored name for an unknown code", () => {
