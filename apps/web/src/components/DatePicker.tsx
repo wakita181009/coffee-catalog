@@ -9,9 +9,9 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { formatDate } from "./format.ts";
-import type { Language } from "./i18n/index.ts";
-import { isoToLocalDate, localDateToIso } from "./isoDate.ts";
+import type { Language } from "@/i18n";
+import { formatDate } from "@/lib/format";
+import { isoToLocalDate, localDateToIso } from "@/lib/isoDate";
 
 const DAY_PICKER_LOCALES: Record<Language, Locale> = { en: enUS, es, ja, pl };
 
