@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LANGUAGES } from "./i18n/index.ts";
+import { LANGUAGES } from "@/i18n";
 
 export function LanguageSwitcher() {
   const { t, i18n } = useTranslation();
