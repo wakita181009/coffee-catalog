@@ -5,12 +5,20 @@ import {
   type Chevron,
   type DayButton,
   DayPicker,
+  type DropdownProps,
   getDefaultClassNames,
   type Root,
   useDayPicker,
   type WeekNumber,
 } from "react-day-picker";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function Calendar({
   className,
@@ -68,19 +76,7 @@ function Calendar({
           "flex h-(--cell-size) w-full items-center justify-center gap-1.5 text-sm font-medium",
           defaultClassNames.dropdowns,
         ),
-        // The native <select> is transparent, so its focus ring has to be drawn on the wrapper.
-        dropdown_root: cn(
-          "relative rounded-(--cell-radius) has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
-          defaultClassNames.dropdown_root,
-        ),
-        dropdown: cn("absolute inset-0 bg-popover opacity-0", defaultClassNames.dropdown),
-        caption_label: cn(
-          "font-medium select-none",
-          captionLayout === "label"
-            ? "text-sm"
-            : "flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground",
-          defaultClassNames.caption_label,
-        ),
+        caption_label: cn("text-sm font-medium select-none", defaultClassNames.caption_label),
         month_grid: cn("w-full border-collapse", defaultClassNames.month_grid),
         weekdays: cn("flex", defaultClassNames.weekdays),
         weekday: cn(
@@ -124,6 +120,7 @@ function Calendar({
       components={{
         Root: CalendarRoot,
         Chevron: CalendarChevron,
+        Dropdown: CalendarDropdown,
         DayButton: CalendarDayButton,
         WeekNumber: CalendarWeekNumber,
         ...components,
@@ -153,6 +150,39 @@ function CalendarChevron({
   }
 
   return <ChevronDownIcon className={cn("size-4", className)} {...props} />;
+}
+
+// DayPicker's handlers only read `e.target.value`, so a minimal stand-in event is enough to
+// drive them from the Base UI select.
+function CalendarDropdown({
+  options = [],
+  value,
+  onChange,
+  disabled,
+  "aria-label": ariaLabel,
+}: DropdownProps) {
+  return (
+    <Select
+      items={options}
+      value={value as number}
+      disabled={disabled}
+      onValueChange={(next) => {
+        if (next === null) return;
+        onChange?.({ target: { value: String(next) } } as React.ChangeEvent<HTMLSelectElement>);
+      }}
+    >
+      <SelectTrigger size="sm" aria-label={ariaLabel}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent className="min-w-0">
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 }
 
 function CalendarWeekNumber({ children, ...props }: React.ComponentProps<typeof WeekNumber>) {
