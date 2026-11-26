@@ -45,9 +45,9 @@ async function pickDate(id: string, iso: string) {
   );
 }
 
-async function submitPrice(from: string, amount: string) {
+async function submitPrice(from: string, amount: string, currency = "JPY") {
   await pickDate("price-from", from);
-  await userEvent.type(screen.getByLabelText("Price (JPY)"), amount);
+  await userEvent.type(screen.getByLabelText(`Price (${currency})`), amount);
   await userEvent.click(screen.getByRole("button", { name: "Set price" }));
 }
 
@@ -123,15 +123,39 @@ describe("SkuDetail", () => {
     expect(onChanged).toHaveBeenCalledOnce();
   });
 
+  test("accepts only digits and groups them with commas", async () => {
+    serveApi();
+    renderDetail();
+    await screen.findByText("￥1,480");
+    const amount = screen.getByLabelText("Price (JPY)");
+
+    await userEvent.type(amount, "1a2.3-4567");
+
+    expect(amount).toHaveValue("1,234,567");
+  });
+
+  test("keeps the caret in place when editing inside a grouped amount", async () => {
+    serveApi();
+    renderDetail();
+    await screen.findByText("￥1,480");
+    const amount = screen.getByLabelText("Price (JPY)") as HTMLInputElement;
+    await userEvent.type(amount, "12345");
+
+    await userEvent.type(amount, "9", { initialSelectionStart: 1, initialSelectionEnd: 1 });
+
+    expect(amount).toHaveValue("192,345");
+    expect(amount.selectionStart).toBe(2);
+  });
+
   test("rejects an amount the market's currency cannot hold", async () => {
     const fetch = serveApi();
-    const { onChanged } = renderDetail();
+    const { onChanged } = renderDetail({ market: ES });
     await screen.findByText("￥1,480");
     const calls = fetch.mock.calls.length;
 
-    await submitPrice("2027-01-01", "17.80");
+    await submitPrice("2027-01-01", "17.", "EUR");
 
-    expect(screen.getByRole("status")).toHaveTextContent("Enter a price in JPY");
+    expect(screen.getByRole("status")).toHaveTextContent("Enter a price in EUR");
     expect(fetch.mock.calls.length).toBe(calls);
     expect(onChanged).not.toHaveBeenCalled();
   });
