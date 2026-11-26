@@ -2,7 +2,7 @@ import type { ListedSku } from "@coffee-catalog/api/catalog";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
-import { SkuTable } from "./SkuTable.tsx";
+import { SkuTable, SkuTableSkeleton } from "./SkuTable.tsx";
 
 const JP = { code: "JP", name: "Japan", currency: "JPY", minorUnit: 0 };
 
@@ -18,6 +18,16 @@ const sku = (overrides: Partial<ListedSku>): ListedSku => ({
   launchedOn: "2025-04-01",
   amountMinor: 1680,
   ...overrides,
+});
+
+describe("SkuTableSkeleton", () => {
+  test("announces loading and hides the placeholder table from assistive tech", () => {
+    render(<SkuTableSkeleton />);
+
+    expect(screen.getByRole("status")).toHaveTextContent("Loading SKUs…");
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(screen.getByRole("table", { hidden: true })).toBeInTheDocument();
+  });
 });
 
 describe("SkuTable", () => {

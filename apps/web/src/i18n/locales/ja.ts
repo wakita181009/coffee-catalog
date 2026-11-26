@@ -14,6 +14,7 @@ export const ja: Messages = {
     origin: "産地",
     price: "価格",
     empty: "{{market}}ではこの日に販売中の商品はありません。",
+    loading: "SKUを読み込み中…",
   },
   roast: {
     light: "浅煎り",

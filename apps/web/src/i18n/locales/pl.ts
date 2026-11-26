@@ -15,6 +15,7 @@ export const pl: Messages = {
     origin: "Pochodzenie",
     price: "Cena",
     empty: "{{market}}: brak produktów w sprzedaży w tym dniu.",
+    loading: "Wczytywanie SKU…",
   },
   roast: {
     light: "Jasne",

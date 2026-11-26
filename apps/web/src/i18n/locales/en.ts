@@ -12,6 +12,7 @@ export const en = {
     origin: "Origin",
     price: "Price",
     empty: "Nothing on sale in {{market}} on this date.",
+    loading: "Loading SKUs…",
   },
   roast: {
     light: "Light",

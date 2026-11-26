@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { serveApi } from "../test/api.ts";
@@ -29,6 +29,31 @@ describe("App", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Spain" }));
     expect(await screen.findByText(/8,90/)).toBeInTheDocument();
+  });
+
+  test("shows a skeleton until SKUs load and ignores a slower response for a previous market", async () => {
+    const api = serveApi();
+    const handle = api.getMockImplementation();
+    let releaseJapan = () => {};
+    const japanGate = new Promise<void>((resolve) => {
+      releaseJapan = resolve;
+    });
+    api.mockImplementation(async (input, init) => {
+      if (String(input).includes("market=JP")) await japanGate;
+      return handle?.(input, init) as Promise<Response>;
+    });
+    render(<App />);
+
+    expect(screen.getByRole("status")).toHaveTextContent("Loading SKUs…");
+
+    await userEvent.click(await screen.findByRole("button", { name: "Spain" }));
+    expect(await screen.findByText(/8,90/)).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    releaseJapan();
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    expect(screen.getByText(/8,90/)).toBeInTheDocument();
+    expect(screen.queryByText("￥1,480")).not.toBeInTheDocument();
   });
 
   test("keeps the market selected when its toggle is clicked again", async () => {
