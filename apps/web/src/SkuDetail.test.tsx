@@ -33,12 +33,12 @@ async function pickDate(id: string, iso: string) {
   const month = date.getMonth() + 1;
   const day = date.getDate();
   await userEvent.click(picker(id));
-  await userEvent.selectOptions(screen.getByRole("combobox", { name: /year/i }), String(year));
-  await userEvent.selectOptions(
-    screen.getByRole("combobox", { name: /month/i }),
-    String(month - 1),
-  );
   const monthName = new Date(year, month - 1).toLocaleString("en", { month: "long" });
+  const monthShort = new Date(year, month - 1).toLocaleString("en", { month: "short" });
+  await userEvent.click(screen.getByRole("combobox", { name: /year/i }));
+  await userEvent.click(await screen.findByRole("option", { name: String(year) }));
+  await userEvent.click(screen.getByRole("combobox", { name: /month/i }));
+  await userEvent.click(await screen.findByRole("option", { name: monthShort }));
   const suffix = ORDINAL[ordinalRules.select(day)];
   await userEvent.click(
     screen.getByRole("button", { name: new RegExp(`${monthName} ${day}${suffix}, ${year}`) }),

@@ -23,6 +23,18 @@ describe("DatePicker", () => {
     expect(screen.queryByRole("grid")).not.toBeInTheDocument();
   });
 
+  test("navigates months and years with the caption selects", async () => {
+    render(<DatePicker value="2026-11-26" onChange={() => {}} />);
+
+    await userEvent.click(screen.getByRole("button"));
+    await userEvent.click(screen.getByRole("combobox", { name: /year/i }));
+    await userEvent.click(await screen.findByRole("option", { name: "2028" }));
+    await userEvent.click(screen.getByRole("combobox", { name: /month/i }));
+    await userEvent.click(await screen.findByRole("option", { name: "Mar" }));
+
+    expect(screen.getByRole("grid")).toHaveAccessibleName("March 2028");
+  });
+
   test("uses the calendar locale of the UI language", async () => {
     await i18n.changeLanguage("ja");
     render(<DatePicker value="2026-11-26" onChange={() => {}} />);
