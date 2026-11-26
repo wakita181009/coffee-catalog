@@ -117,6 +117,11 @@ export function listMarkets(db: Db): Market[] {
     .all() as Market[];
 }
 
+export function listFamilies(db: Db): string[] {
+  const rows = db.prepare("SELECT name FROM families ORDER BY name").all() as { name: string }[];
+  return rows.map((row) => row.name);
+}
+
 export function addFamily(db: Db, name: string): void {
   try {
     db.prepare("INSERT INTO families (name) VALUES (?)").run(name);

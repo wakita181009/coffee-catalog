@@ -84,6 +84,46 @@ describe("App", () => {
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
   });
 
+  test("creates a SKU, lists it, and opens its details", async () => {
+    serveApi();
+    render(<App />);
+    await screen.findByText("￥1,480");
+
+    await userEvent.click(screen.getByRole("button", { name: /MB-250-M/ }));
+    await userEvent.click(screen.getByRole("button", { name: "New SKU" }));
+    expect(screen.queryByRole("complementary", { name: /Details for/ })).not.toBeInTheDocument();
+    const form = screen.getByRole("complementary", { name: "New SKU" });
+    await within(form).findByRole("combobox", { name: "Family" });
+
+    await userEvent.type(within(form).getByLabelText("Code"), "DC-250-M");
+    await userEvent.type(within(form).getByLabelText("Name"), "Decaf 250 g");
+    await userEvent.type(within(form).getByLabelText("Origin"), "Mexico");
+    await userEvent.type(within(form).getByLabelText("Weight (g)"), "250");
+    await userEvent.type(within(form).getByLabelText("Price (JPY)"), "1600");
+    await userEvent.click(within(form).getByRole("button", { name: "Create and launch" }));
+
+    expect(
+      await screen.findByRole("complementary", { name: "Details for DC-250-M" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("complementary", { name: "New SKU" })).not.toBeInTheDocument();
+    await waitFor(() => expect(priceOf(/DC-250-M/)).toBe("￥1,600"));
+  });
+
+  test("closes the new SKU form, and picking a SKU replaces it", async () => {
+    serveApi();
+    render(<App />);
+    await screen.findByText("￥1,480");
+
+    await userEvent.click(screen.getByRole("button", { name: "New SKU" }));
+    await userEvent.click(screen.getByRole("button", { name: "Close new SKU form" }));
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "New SKU" }));
+    await userEvent.click(screen.getByRole("button", { name: /MB-250-M/ }));
+    expect(screen.getByRole("complementary", { name: "Details for MB-250-M" })).toBeInTheDocument();
+    expect(screen.queryByRole("complementary", { name: "New SKU" })).not.toBeInTheDocument();
+  });
+
   test("shows the API error when markets cannot be loaded", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       Response.json({ error: "internal", message: "Something went wrong" }, { status: 500 }),

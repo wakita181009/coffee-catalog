@@ -76,6 +76,7 @@ All errors return `{ "error": "invalid" | "not_found" | "conflict" | "internal",
 | ------ | ----------------------------- | ------------------------------------------------ |
 | GET    | `/api/markets`                |                                                  |
 | GET    | `/api/skus`                   | `?market=JP&on=2026-10-01`                       |
+| GET    | `/api/families`               | Family names, sorted                             |
 | POST   | `/api/families`               | `{ name }`                                       |
 | POST   | `/api/skus`                   | `{ code, family, name, roast, weightG, origin }` |
 | POST   | `/api/skus/:code/launches`    | `{ market, on, amountMinor }`                    |

@@ -75,6 +75,11 @@ describe("price changes", () => {
 describe("catalog setup", () => {
   test("creates a family, a SKU, and launches it", async () => {
     expect((await api.api.families.$post({ json: { name: "Decaf" } })).status).toBe(201);
+    expect(await (await api.api.families.$get()).json()).toEqual([
+      "Decaf",
+      "Morning Blend",
+      "Single Origin",
+    ]);
     const sku = await api.api.skus.$post({
       json: {
         code: "DC-250-M",

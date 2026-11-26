@@ -1,13 +1,16 @@
 import type { ListedSku, Market } from "@coffee-catalog/api/catalog";
+import { PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DatePicker } from "@/components/DatePicker";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { marketName } from "@/lib/format";
 import { client, unwrap } from "./api.ts";
+import { NewSkuForm } from "./NewSkuForm.tsx";
 import { SkuDetail } from "./SkuDetail.tsx";
 import { SkuTable } from "./SkuTable.tsx";
 
@@ -22,6 +25,7 @@ export function App() {
   const [on, setOn] = useState(today);
   const [skus, setSkus] = useState<ListedSku[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const market = markets.find((m) => m.code === marketCode);
@@ -43,6 +47,21 @@ export function App() {
   }, [marketCode, on]);
 
   useEffect(loadSkus, [loadSkus]);
+
+  function select(code: string | null) {
+    setCreating(false);
+    setSelected(code);
+  }
+
+  function startCreating() {
+    setSelected(null);
+    setCreating(true);
+  }
+
+  function onCreated(code: string) {
+    select(code);
+    loadSkus();
+  }
 
   return (
     <div className="mx-auto flex min-h-svh max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8">
@@ -74,6 +93,10 @@ export function App() {
             <DatePicker id="prices-on" value={on} onChange={setOn} className="w-44" />
           </div>
           <LanguageSwitcher />
+          <Button onClick={startCreating} disabled={!market}>
+            <PlusIcon data-icon="inline-start" />
+            {t("newSku.open")}
+          </Button>
         </div>
       </header>
 
@@ -84,9 +107,7 @@ export function App() {
       )}
 
       <main className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-        {market && (
-          <SkuTable skus={skus} market={market} selected={selected} onSelect={setSelected} />
-        )}
+        {market && <SkuTable skus={skus} market={market} selected={selected} onSelect={select} />}
         {selected && market && (
           <SkuDetail
             key={selected}
@@ -94,7 +115,16 @@ export function App() {
             markets={markets}
             market={market}
             onChanged={loadSkus}
-            onClose={() => setSelected(null)}
+            onClose={() => select(null)}
+          />
+        )}
+        {creating && market && (
+          <NewSkuForm
+            markets={markets}
+            market={market}
+            on={on}
+            onCreated={onCreated}
+            onClose={() => setCreating(false)}
           />
         )}
       </main>

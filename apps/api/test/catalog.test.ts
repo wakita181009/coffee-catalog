@@ -7,6 +7,7 @@ import {
   eventsFor,
   isIsoDate,
   launch,
+  listFamilies,
   listMarkets,
   listSkus,
   priceHistory,
@@ -47,6 +48,11 @@ describe("seed", () => {
 });
 
 describe("families and SKUs", () => {
+  test("lists family names in order", () => {
+    addFamily(db, "Decaf");
+    expect(listFamilies(db)).toEqual(["Decaf", "Morning Blend", "Single Origin"]);
+  });
+
   test("rejects a duplicate family", () => {
     expect(() => addFamily(db, "Morning Blend")).toThrow(/already exists/);
   });
