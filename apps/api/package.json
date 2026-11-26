@@ -12,7 +12,8 @@
     "dev": "node --watch src/server.ts",
     "start": "node src/server.ts",
     "typecheck": "tsc -p .",
-    "test": "vitest run --coverage"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@hono/node-server": "2.1.11",

@@ -27,7 +27,7 @@ describe("App", () => {
       "Sep 20, 2026",
     );
 
-    await userEvent.click(screen.getByRole("radio", { name: "Spain" }));
+    await userEvent.click(screen.getByRole("button", { name: "Spain" }));
     expect(await screen.findByText(/8,90/)).toBeInTheDocument();
   });
 
@@ -36,9 +36,9 @@ describe("App", () => {
     render(<App />);
     await screen.findByText("￥1,480");
 
-    await userEvent.click(screen.getByRole("radio", { name: "Japan" }));
+    await userEvent.click(screen.getByRole("button", { name: "Japan" }));
 
-    expect(screen.getByRole("radio", { name: "Japan" })).toBeChecked();
+    expect(screen.getByRole("button", { name: "Japan" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("￥1,480")).toBeInTheDocument();
   });
 

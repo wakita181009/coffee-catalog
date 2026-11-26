@@ -8,7 +8,7 @@ describe("LanguageSwitcher", () => {
     render(<LanguageSwitcher />);
 
     await userEvent.click(screen.getByRole("combobox", { name: "Language" }));
-    await userEvent.click(screen.getByRole("option", { name: "Español" }));
+    await userEvent.click(await screen.findByRole("option", { name: "Español" }));
 
     expect(await screen.findByRole("combobox", { name: "Idioma" })).toHaveTextContent("Español");
     expect(document.documentElement.lang).toBe("es");

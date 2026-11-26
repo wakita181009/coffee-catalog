@@ -1,5 +1,7 @@
 # Coffee Catalog
 
+> **Note:** This is a sample React and Node.js project. The roastery, products and prices are made up, and it is not meant for production use.
+
 Back office for a coffee roastery that sells the same SKUs in several countries. It tracks which SKU sells in which market, what it cost on any given day, and when it was discontinued.
 
 ## Done when
