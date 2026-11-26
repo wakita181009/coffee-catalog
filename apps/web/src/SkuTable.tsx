@@ -2,6 +2,7 @@ import type { ListedSku, Market, Roast } from "@coffee-catalog/api/catalog";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -27,6 +28,60 @@ type Props = {
   onSelect: (code: string) => void;
 };
 
+const SKELETON_ROWS = 6;
+
+function SkuTableHeader() {
+  const { t } = useTranslation();
+  return (
+    <TableHeader>
+      <TableRow>
+        <TableHead className="pl-4">{t("table.sku")}</TableHead>
+        <TableHead>{t("table.roast")}</TableHead>
+        <TableHead>{t("table.origin")}</TableHead>
+        <TableHead className="pr-4 text-right">{t("table.price")}</TableHead>
+      </TableRow>
+    </TableHeader>
+  );
+}
+
+// Mirrors SkuTable's row layout so the page doesn't shift when the data arrives.
+export function SkuTableSkeleton() {
+  const { t } = useTranslation();
+  return (
+    <Card className="py-0" aria-busy="true">
+      <span className="sr-only" role="status">
+        {t("table.loading")}
+      </span>
+      <Table aria-hidden="true">
+        <SkuTableHeader />
+        <TableBody>
+          {Array.from({ length: SKELETON_ROWS }, (_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: static placeholder rows never reorder.
+            <TableRow key={i} className="hover:bg-transparent">
+              <TableCell className="pl-4">
+                <div className="grid gap-1.5 py-0.5">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-4 w-56" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-28" />
+              </TableCell>
+              <TableCell className="pr-4">
+                <Skeleton className="ml-auto h-4 w-14" />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+}
+
 export function SkuTable({ skus, market, selected, onSelect }: Props) {
   const { t, i18n } = useTranslation();
 
@@ -41,14 +96,7 @@ export function SkuTable({ skus, market, selected, onSelect }: Props) {
   return (
     <Card className="py-0">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="pl-4">{t("table.sku")}</TableHead>
-            <TableHead>{t("table.roast")}</TableHead>
-            <TableHead>{t("table.origin")}</TableHead>
-            <TableHead className="pr-4 text-right">{t("table.price")}</TableHead>
-          </TableRow>
-        </TableHeader>
+        <SkuTableHeader />
         <TableBody>
           {skus.map((sku) => (
             <TableRow key={sku.code} data-state={sku.code === selected ? "selected" : undefined}>

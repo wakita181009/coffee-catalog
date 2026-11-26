@@ -1,15 +1,20 @@
 import type { ListedSku, Market } from "@coffee-catalog/api/catalog";
-import { useCallback, useEffect, useState } from "react";
+import { PlusIcon } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DatePicker } from "@/components/DatePicker";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { marketName } from "@/lib/format";
 import { client, unwrap } from "./api.ts";
+import { NewSkuForm } from "./NewSkuForm.tsx";
 import { SkuDetail } from "./SkuDetail.tsx";
-import { SkuTable } from "./SkuTable.tsx";
+import { SkuTable, SkuTableSkeleton } from "./SkuTable.tsx";
+
+type SkuList = { market: string; on: string; rows: ListedSku[] };
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -20,11 +25,16 @@ export function App() {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [marketCode, setMarketCode] = useState("JP");
   const [on, setOn] = useState(today);
-  const [skus, setSkus] = useState<ListedSku[]>([]);
+  const [list, setList] = useState<SkuList | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const latestQuery = useRef("");
 
   const market = markets.find((m) => m.code === marketCode);
+  // Rows fetched for another market/date are stale: show the skeleton until the new ones land,
+  // but keep current rows visible while they are refreshed after an edit.
+  const skus = list?.market === marketCode && list.on === on ? list.rows : null;
 
   useEffect(() => {
     unwrap(client.api.markets.$get())
@@ -34,15 +44,34 @@ export function App() {
 
   const loadSkus = useCallback(() => {
     if (!on) return;
+    const query = `${marketCode}|${on}`;
+    latestQuery.current = query;
     unwrap(client.api.skus.$get({ query: { market: marketCode, on } }))
       .then((rows) => {
-        setSkus(rows);
+        // Switching market/date quickly can resolve requests out of order.
+        if (latestQuery.current !== query) return;
+        setList({ market: marketCode, on, rows });
         setError(null);
       })
       .catch((e: Error) => setError(e.message));
   }, [marketCode, on]);
 
   useEffect(loadSkus, [loadSkus]);
+
+  function select(code: string | null) {
+    setCreating(false);
+    setSelected(code);
+  }
+
+  function startCreating() {
+    setSelected(null);
+    setCreating(true);
+  }
+
+  function onCreated(code: string) {
+    select(code);
+    loadSkus();
+  }
 
   return (
     <div className="mx-auto flex min-h-svh max-w-6xl flex-col gap-8 px-4 py-10 sm:px-8">
@@ -74,6 +103,10 @@ export function App() {
             <DatePicker id="prices-on" value={on} onChange={setOn} className="w-44" />
           </div>
           <LanguageSwitcher />
+          <Button onClick={startCreating} disabled={!market}>
+            <PlusIcon data-icon="inline-start" />
+            {t("newSku.open")}
+          </Button>
         </div>
       </header>
 
@@ -84,8 +117,10 @@ export function App() {
       )}
 
       <main className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-        {market && (
-          <SkuTable skus={skus} market={market} selected={selected} onSelect={setSelected} />
+        {market && skus ? (
+          <SkuTable skus={skus} market={market} selected={selected} onSelect={select} />
+        ) : (
+          !error && <SkuTableSkeleton />
         )}
         {selected && market && (
           <SkuDetail
@@ -94,7 +129,16 @@ export function App() {
             markets={markets}
             market={market}
             onChanged={loadSkus}
-            onClose={() => setSelected(null)}
+            onClose={() => select(null)}
+          />
+        )}
+        {creating && market && (
+          <NewSkuForm
+            markets={markets}
+            market={market}
+            on={on}
+            onCreated={onCreated}
+            onClose={() => setCreating(false)}
           />
         )}
       </main>

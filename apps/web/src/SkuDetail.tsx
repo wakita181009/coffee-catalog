@@ -2,12 +2,12 @@ import type { CatalogEvent, Market, Price } from "@coffee-catalog/api/catalog";
 import { XIcon } from "lucide-react";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AmountInput } from "@/components/AmountInput";
 import { DatePicker } from "@/components/DatePicker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { formatDate, marketName } from "@/lib/format";
@@ -174,7 +174,12 @@ export function SkuDetail({ code, markets, market, onChanged, onClose }: Props) 
                 <Label htmlFor="price-amount">
                   {t("detail.price", { currency: market.currency })}
                 </Label>
-                <Input id="price-amount" name="amount" inputMode="decimal" required />
+                <AmountInput
+                  id="price-amount"
+                  name="amount"
+                  minorUnit={market.minorUnit}
+                  required
+                />
               </div>
               <Button type="submit">{t("detail.setPrice")}</Button>
             </form>
