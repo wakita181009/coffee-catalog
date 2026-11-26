@@ -2,6 +2,7 @@ import type { CatalogEvent, Market, Price } from "@coffee-catalog/api/catalog";
 import { XIcon } from "lucide-react";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { DatePicker } from "@/components/DatePicker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { formatDate, marketName } from "@/lib/format";
+import { localDateToIso } from "@/lib/isoDate";
 import { formatMoney, parseMoney } from "@/lib/money";
 import { client, unwrap } from "./api.ts";
 
@@ -45,6 +47,8 @@ export function SkuDetail({ code, markets, market, onChanged, onClose }: Props) 
   const [prices, setPrices] = useState<Price[]>([]);
   const [events, setEvents] = useState<CatalogEvent[]>([]);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [priceFrom, setPriceFrom] = useState(() => localDateToIso(new Date()));
+  const [discontinueOn, setDiscontinueOn] = useState(() => localDateToIso(new Date()));
 
   const load = useCallback(() => {
     const param = { code };
@@ -74,9 +78,9 @@ export function SkuDetail({ code, markets, market, onChanged, onClose }: Props) 
 
   function onPrice(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const from = String(form.get("from"));
-    const amountMinor = parseMoney(String(form.get("amount")), market.minorUnit);
+    const from = priceFrom;
+    const amount = new FormData(event.currentTarget).get("amount");
+    const amountMinor = parseMoney(String(amount), market.minorUnit);
     if (amountMinor === null) {
       setMessage({ kind: "error", text: t("message.enterPrice", { currency: market.currency }) });
       return;
@@ -95,7 +99,7 @@ export function SkuDetail({ code, markets, market, onChanged, onClose }: Props) 
 
   function onDiscontinue(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const on = String(new FormData(event.currentTarget).get("on"));
+    const on = discontinueOn;
     run(
       () => unwrap(client.api.skus[":code"].discontinue.$post({ param: { code }, json: { on } })),
       t("message.discontinuedFrom", { date: formatDate(on, lang) }),
@@ -159,7 +163,12 @@ export function SkuDetail({ code, markets, market, onChanged, onClose }: Props) 
             <form className="flex flex-wrap items-end gap-3" onSubmit={onPrice}>
               <div className="grid gap-1.5">
                 <Label htmlFor="price-from">{t("detail.from")}</Label>
-                <Input id="price-from" type="date" name="from" required />
+                <DatePicker
+                  id="price-from"
+                  value={priceFrom}
+                  onChange={setPriceFrom}
+                  className="w-44"
+                />
               </div>
               <div className="grid w-28 gap-1.5">
                 <Label htmlFor="price-amount">
@@ -175,7 +184,12 @@ export function SkuDetail({ code, markets, market, onChanged, onClose }: Props) 
             <form className="flex flex-wrap items-end gap-3" onSubmit={onDiscontinue}>
               <div className="grid gap-1.5">
                 <Label htmlFor="discontinue-on">{t("detail.discontinueOn")}</Label>
-                <Input id="discontinue-on" type="date" name="on" required />
+                <DatePicker
+                  id="discontinue-on"
+                  value={discontinueOn}
+                  onChange={setDiscontinueOn}
+                  className="w-44"
+                />
               </div>
               <Button type="submit" variant="destructive">
                 {t("detail.discontinueAction")}
