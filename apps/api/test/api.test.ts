@@ -1,5 +1,5 @@
 import { testClient } from "hono/testing";
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { createApp } from "../src/app.ts";
 import { openDb } from "../src/db.ts";
 import { seed } from "../src/seed.ts";
@@ -62,6 +62,14 @@ describe("price changes", () => {
     });
     expect(await res.json()).toEqual({ amountMinor: 1350 });
   });
+
+  test("returns a null price where the SKU was never sold", async () => {
+    const res = await api.api.skus[":code"].price.$get({
+      param: { code: "MB-1000-D" },
+      query: { market: "ES", on: "2026-01-01" },
+    });
+    expect(await res.json()).toEqual({ amountMinor: null });
+  });
 });
 
 describe("catalog setup", () => {
@@ -109,5 +117,20 @@ describe("catalog setup", () => {
   test("returns 404 for an unknown SKU", async () => {
     const res = await api.api.skus[":code"].events.$get({ param: { code: "NOPE" } });
     expect(res.status).toBe(404);
+  });
+});
+
+describe("unexpected errors", () => {
+  test("returns 500 with a generic message and logs the cause", async () => {
+    const db = openDb();
+    db.close();
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await testClient(createApp(db)).api.markets.$get();
+
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: "internal", message: "Something went wrong" });
+    expect(logged).toHaveBeenCalledOnce();
+    logged.mockRestore();
   });
 });

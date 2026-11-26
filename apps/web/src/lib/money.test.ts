@@ -13,6 +13,10 @@ describe("formatMoney", () => {
     expect(formatMoney(990, EUR)).toMatch(/9,90/);
     expect(formatMoney(990, EUR)).toContain("€");
   });
+
+  test("uses a neutral locale for a currency without a home market", () => {
+    expect(formatMoney(1250, { currency: "USD", minorUnit: 2 })).toBe("US$12.50");
+  });
 });
 
 describe("parseMoney", () => {
