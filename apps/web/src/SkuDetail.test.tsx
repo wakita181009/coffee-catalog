@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { serveApi } from "../test/api.ts";
 import { SkuDetail } from "./SkuDetail.tsx";
 
@@ -18,15 +18,55 @@ function section(title: string) {
   return within(heading.closest("section") as HTMLElement);
 }
 
+const ORDINAL: Record<string, string> = { one: "st", two: "nd", few: "rd", other: "th" };
+const ordinalRules = new Intl.PluralRules("en", { type: "ordinal" });
+
+// Walks the picker's month/year dropdowns, then clicks the day by its accessible name.
+// Both pickers are labelled "From", so they are told apart by id.
+function picker(id: string) {
+  return screen.getByLabelText("From", { selector: `#${id}` });
+}
+
+async function pickDate(id: string, iso: string) {
+  const date = new Date(`${iso}T00:00:00`);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  await userEvent.click(picker(id));
+  await userEvent.selectOptions(screen.getByRole("combobox", { name: /year/i }), String(year));
+  await userEvent.selectOptions(
+    screen.getByRole("combobox", { name: /month/i }),
+    String(month - 1),
+  );
+  const monthName = new Date(year, month - 1).toLocaleString("en", { month: "long" });
+  const suffix = ORDINAL[ordinalRules.select(day)];
+  await userEvent.click(
+    screen.getByRole("button", { name: new RegExp(`${monthName} ${day}${suffix}, ${year}`) }),
+  );
+}
+
 async function submitPrice(from: string, amount: string) {
-  fireEvent.change(screen.getByLabelText("From", { selector: "#price-from" }), {
-    target: { value: from },
-  });
+  await pickDate("price-from", from);
   await userEvent.type(screen.getByLabelText("Price (JPY)"), amount);
   await userEvent.click(screen.getByRole("button", { name: "Set price" }));
 }
 
 describe("SkuDetail", () => {
+  beforeEach(() => {
+    // Only Date is faked so promises and user-event timers keep running.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-09-20T12:00:00Z"));
+  });
+
+  test("defaults both dates to today", async () => {
+    serveApi();
+    renderDetail();
+    await screen.findByText("￥1,480");
+
+    expect(picker("price-from")).toHaveTextContent("Sep 20, 2026");
+    expect(picker("discontinue-on")).toHaveTextContent("Sep 20, 2026");
+  });
+
   test("shows the price history and events in the UI language", async () => {
     serveApi();
     renderDetail();
@@ -112,9 +152,7 @@ describe("SkuDetail", () => {
     const { onChanged } = renderDetail();
     await screen.findByText("￥1,480");
 
-    fireEvent.change(screen.getByLabelText("From", { selector: "#discontinue-on" }), {
-      target: { value: "2027-03-01" },
-    });
+    await pickDate("discontinue-on", "2027-03-01");
     await userEvent.click(screen.getByRole("button", { name: "Discontinue" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent("Discontinued from Mar 1, 2027");
