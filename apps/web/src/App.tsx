@@ -57,11 +57,10 @@ export function App() {
         </div>
         <div className="flex flex-wrap items-end gap-4">
           <ToggleGroup
-            type="single"
             variant="outline"
-            value={marketCode}
-            // Radix emits "" when the active item is clicked again; keep a market selected.
-            onValueChange={(value) => value && setMarketCode(value)}
+            value={[marketCode]}
+            // Base UI emits [] when the active item is clicked again; keep a market selected.
+            onValueChange={([value]) => value && setMarketCode(value)}
             aria-label={t("app.market")}
           >
             {markets.map((m) => (

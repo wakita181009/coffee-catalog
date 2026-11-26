@@ -36,15 +36,17 @@ export function DatePicker({ id, value, onChange, className }: DatePickerProps) 
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        {/* A <label for> replaces the button's own text as its name, so the date is attached
-            as a description to keep it announced. */}
-        <Button id={id} variant="outline" className={className} aria-describedby={valueId}>
-          <CalendarIcon data-icon="inline-start" />
-          <span id={valueId} className="flex-1 text-left tabular-nums">
-            {selected ? formatDate(value, i18n.language) : "—"}
-          </span>
-        </Button>
+      {/* A <label for> replaces the button's own text as its name, so the date is attached
+          as a description to keep it announced. */}
+      <PopoverTrigger
+        render={
+          <Button id={id} variant="outline" className={className} aria-describedby={valueId} />
+        }
+      >
+        <CalendarIcon data-icon="inline-start" />
+        <span id={valueId} className="flex-1 text-left tabular-nums">
+          {selected ? formatDate(value, i18n.language) : "—"}
+        </span>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="end">
         <Calendar
