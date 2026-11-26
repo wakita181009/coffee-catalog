@@ -2,10 +2,10 @@ import type { ListedSku, Market } from "@coffee-catalog/api/catalog";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { client, unwrap } from "./api.ts";
+import { DatePicker } from "./DatePicker.tsx";
 import { marketName } from "./format.ts";
 import { LanguageSwitcher } from "./LanguageSwitcher.tsx";
 import { SkuDetail } from "./SkuDetail.tsx";
@@ -72,13 +72,7 @@ export function App() {
           </ToggleGroup>
           <div className="grid gap-1.5">
             <Label htmlFor="prices-on">{t("app.pricesOn")}</Label>
-            <Input
-              id="prices-on"
-              type="date"
-              value={on}
-              onChange={(e) => setOn(e.target.value)}
-              className="w-40"
-            />
+            <DatePicker id="prices-on" value={on} onChange={setOn} className="w-44" />
           </div>
           <LanguageSwitcher />
         </div>
