@@ -12,6 +12,7 @@ import {
   eventsFor,
   isIsoDate,
   launch,
+  listFamilies,
   listMarkets,
   listSkus,
   priceHistory,
@@ -58,6 +59,7 @@ export function createApp(db: Db) {
     .get("/api/skus", validate("query", z.object({ market: marketCode, on: isoDate })), (c) =>
       c.json(listSkus(db, c.req.valid("query"))),
     )
+    .get("/api/families", (c) => c.json(listFamilies(db)))
     .post("/api/families", validate("json", z.object({ name: z.string().min(1) })), (c) => {
       addFamily(db, c.req.valid("json").name);
       return c.json({ ok: true }, 201);
