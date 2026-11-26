@@ -68,7 +68,7 @@ describe("NewSkuForm", () => {
     await choose("Family", "New family");
     await userEvent.type(screen.getByLabelText("Family name"), "Decaf");
     await choose("Market", "Spain");
-    await fillSku({ amount: "9,50" });
+    await fillSku({ amount: "9.50" });
     await submit();
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith("DC-250-M"));
